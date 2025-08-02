@@ -15,12 +15,32 @@ pipeline {
     stages {
         stage('Setup Docker') {
             steps {
-                sh '''
-                    if ! command -v docker &> /dev/null; then
-                        curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
-                        sudo systemctl start docker && sudo systemctl enable docker
-                    fi
-                '''
+                script {
+                    // Check if Docker is already installed
+                    def dockerInstalled = sh(script: 'command -v docker', returnStatus: true) == 0
+                    
+                    if (!dockerInstalled) {
+                        echo "Docker not found. Installing Docker..."
+                        sh '''
+                            curl -fsSL https://get.docker.com -o get-docker.sh
+                            sh get-docker.sh
+                            # Add current user to docker group
+                            sudo usermod -aG docker $USER
+                        '''
+                        echo "Docker installed. You may need to restart Jenkins for group changes to take effect."
+                    } else {
+                        echo "Docker is already installed"
+                    }
+                    
+                    // Start Docker service (this might still need sudo permissions)
+                    sh '''
+                        if ! systemctl is-active --quiet docker; then
+                            echo "Starting Docker service..."
+                            sudo systemctl start docker
+                            sudo systemctl enable docker
+                        fi
+                    '''
+                }
             }
         }
 
