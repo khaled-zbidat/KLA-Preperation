@@ -147,25 +147,24 @@ pipeline {
                 }
             }
         }
-
         stage('Deployment') {
             steps {
                 script {
-                    sh '''
-                        cd "Task2 - Jenkins_Project"
-                        echo "Preparing SSH config..."
-                        mkdir -p "$HOME/.ssh"
-                        chmod 700 "$HOME/.ssh"
-                        touch "$HOME/.ssh/known_hosts"
-                        chmod 644 "$HOME/.ssh/known_hosts"
-
-                        echo "Adding server to known_hosts..."
-                        ssh-keyscan -H $PROD_IP >> "$HOME/.ssh/known_hosts"
-
-                        echo "Deploying..."
-                        scp -o StrictHostKeyChecking=no docker-compose.yml $PROD_UNAME@$PROD_IP:/home/$PROD_UNAME/
-                        ssh $PROD_UNAME@$PROD_IP "cd /home/$PROD_UNAME && docker-compose down && docker-compose up -d"
-                    '''
+                    try {
+                        sh '''
+                            cd "Task2 - Jenkins_Project"
+                            echo "Deploying with Docker Hub image..."
+                            ssh ${PROD_UNAME}@${PROD_IP} '
+                                cd /home/ubuntu/weather_app &&
+                                docker pull khaled2infinity/weather-app:latest &&
+                                docker-compose down &&
+                                docker-compose up -d
+                            '
+                        '''
+                    } catch (Exception error) {
+                        currentBuild.description = "Stage 'Deployment' FAILED - ${error.getMessage()}"
+                        error "Stage 'Deployment' FAILED - ${error.getMessage()}"
+                    }
                 }
             }
         }
