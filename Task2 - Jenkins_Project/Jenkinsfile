@@ -153,6 +153,7 @@ pipeline {
                 script {
                     try {
                         sh '''
+                            ssh-keyscan ${PROD_IP} >> ~/.ssh/known_hosts
                             ssh ${PROD_UNAME}@${PROD_IP} 'cd /home/ubuntu/weather_app && docker pull khaled2infinity/weather-app:v1 && docker-compose down && docker-compose up -d'
                         '''
                     } catch (Exception error) {
@@ -162,7 +163,6 @@ pipeline {
                 }
             }
         }
-    }
 
     post {
         success {
