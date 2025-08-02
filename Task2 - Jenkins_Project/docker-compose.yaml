@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  weather-app:
+    build: .
+    container_name: weather_app
+    ports:
+      - "5000:5000"  # Host:Container
+    volumes:
+      - .:/app
+    restart: always
