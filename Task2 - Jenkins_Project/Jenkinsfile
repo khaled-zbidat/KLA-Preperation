@@ -1,12 +1,15 @@
 pipeline {
     agent any
+    triggers {
+        githubPush()
+    }
 
     environment {
         DOCKER_IMAGE = 'weather-app'
         DOCKER_TAG = 'v1'
         DOCKERHUB_CREDENTIALS = credentials('khaled2infinity-dockerhub')
         PROD_UNAME = 'ubuntu'
-        PROD_IP = '172.31.35.199'
+        PROD_IP = '3.126.33.123'
     }
 
     stages {
@@ -122,6 +125,7 @@ pipeline {
 
     post {
         success {
+            echo "✅ Pipeline succeeded!"
             /*
             slackSend channel: 'succeeded-build', color: '#36a64f', message: """
             *:white_check_mark: Deployment Succeeded!*
@@ -133,6 +137,7 @@ pipeline {
         */
         }
         failure {
+            echo "❌ Pipeline failed!"
             /*
             slackSend channel: 'devops-alerts', color: '#ff0000', message: """
             *:x: Deployment Failed!*
