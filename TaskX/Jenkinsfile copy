@@ -1,0 +1,145 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'weather-app'
+        DOCKER_TAG = 'v1'
+        DOCKERHUB_CREDENTIALS = credentials('khaled2infinity-dockerhub')
+        PROD_UNAME = 'ubuntu'
+        PROD_IP = '172.31.35.199'
+    }
+
+    stages {
+        stage('Clean') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                        docker ps -aq | xargs -r docker rm -f
+                        docker images -q | xargs -r docker rmi -f
+                        docker volume prune -f
+                        docker network prune -f
+                        '''
+                        checkout scm
+                    } catch (Exception error) {
+                        currentBuild.description = "Stage 'Clean' FAILED - ${error.getMessage()}"
+                        error "Stage 'Clean' FAILED - ${error.getMessage()}"
+                    }
+                }
+            }
+        }
+
+        stage('Pylint') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            if [ ! -d "venv" ]; then
+                                python3 -m venv venv
+                            fi
+                            . ./venv/bin/activate
+                            pip install -r requirements.txt
+                            pylint --fail-under=5 app.py
+                        '''
+                    } catch (Exception error) {
+                        currentBuild.description = "Stage 'Pylint' FAILED - ${error.getMessage()}"
+                        error "Stage 'Pylint' FAILED - ${error.getMessage()}"
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            docker build -t khaled2infinity/${DOCKER_IMAGE}:${DOCKER_TAG} .
+                            docker run -d --name ${DOCKER_IMAGE} -p 5000:5000 khaled2infinity/${DOCKER_IMAGE}:${DOCKER_TAG}
+                            sleep 3
+                        '''
+                    } catch (Exception error) {
+                        currentBuild.description = "Stage 'Build' FAILED - ${error.getMessage()}"
+                        error "Stage 'Build' FAILED - ${error.getMessage()}"
+                    }
+                }
+            }
+        }
+
+        stage('Test Availability') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            public_ip=$(curl -s http://checkip.amazonaws.com)
+                            if wget -q --spider http://${public_ip}:5000/; then
+                                echo "Site Available"
+                            else
+                                exit 1
+                            fi
+                        '''
+                    } catch (Exception error) {
+                        currentBuild.description = "Stage 'Test Availability' FAILED - ${error.getMessage()}"
+                        error "Stage 'Test Availability' FAILED - ${error.getMessage()}"
+                    }
+                }
+            }
+        }
+
+        stage('Push Image To DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'khaled2infinity-dockerhub', usernameVariable: 'DOCKER_CREDENTIALS_USR', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
+                    script {
+                        try {
+                            sh '''
+                                echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --password-stdin
+                                docker push ${DOCKER_CREDENTIALS_USR}/${DOCKER_IMAGE}:${DOCKER_TAG}
+                            '''
+                        } catch (Exception error) {
+                            currentBuild.description = "Stage 'Push Image To DockerHub' FAILED - ${error.getMessage()}"
+                            error "Stage 'Push Image To DockerHub' FAILED - ${error.getMessage()}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deployment') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            ssh ${PROD_UNAME}@${PROD_IP} 'cd /home/ubuntu/weather_app && docker pull khaled2infinity/weather-app:v1 && docker-compose down && docker-compose up -d'
+                        '''
+                    } catch (Exception error) {
+                        currentBuild.description = "Stage 'Deployment' FAILED - ${error.getMessage()}"
+                        error "Stage 'Deployment' FAILED - ${error.getMessage()}"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            slackSend channel: 'succeeded-build', color: '#36a64f', message: """
+            *:white_check_mark: Deployment Succeeded!*
+            *Application:* weather-app
+            *Build Status:* SUCCESS!
+            *Docker Image:* khaled2infinity/${DOCKER_IMAGE}:${DOCKER_TAG}
+            *Build Number:* ${env.BUILD_NUMBER}
+        """
+        }
+        failure {
+            slackSend channel: 'devops-alerts', color: '#ff0000', message: """
+            *:x: Deployment Failed!*
+            *Application -* weather-app
+            *Build Status -* FAILURE
+            *Pipeline URL -* ${env.BUILD_URL}
+            
+            *Error Details:*
+            ${currentBuild.description ?: 'No Error Available Details'}
+        """
+        }
+    }
+}
