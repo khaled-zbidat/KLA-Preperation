@@ -13,6 +13,17 @@ pipeline {
     }
 
     stages {
+        stage('Setup Docker') {
+            steps {
+                sh '''
+                    if ! command -v docker &> /dev/null; then
+                        curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
+                        sudo systemctl start docker && sudo systemctl enable docker
+                    fi
+                '''
+            }
+        }
+
         stage('Clean') {
             steps {
                 script {
@@ -26,7 +37,7 @@ pipeline {
                         checkout scm
                     } catch (Exception error) {
                         currentBuild.description = "Stage 'Clean' FAILED - ${error.getMessage()}"
-                        error "Stage 'Clean' FAILED - ${error.getMessage()}"
+                        throw error  // Use throw instead of error()
                     }
                 }
             }
