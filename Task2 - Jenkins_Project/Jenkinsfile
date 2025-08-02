@@ -47,6 +47,8 @@ pipeline {
                 script {
                     try {
                         sh '''
+                            cd Task2\\ -\\ Jenkins_Project
+                            
                             # Remove existing venv if it exists but is broken
                             if [ -d "venv" ] && [ ! -f "venv/bin/activate" ]; then
                                 echo "Removing broken virtual environment..."
