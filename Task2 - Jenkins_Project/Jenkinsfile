@@ -152,6 +152,7 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        cd "Task2 - Jenkins_Project"
                         echo "Preparing SSH config..."
                         mkdir -p "$HOME/.ssh"
                         chmod 700 "$HOME/.ssh"
