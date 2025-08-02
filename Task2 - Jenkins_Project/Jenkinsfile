@@ -115,11 +115,10 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            # Use the PROD_IP environment variable instead of querying checkip.amazonaws.com
-                            if wget -q --spider http://${PROD_IP}:5000/; then
+                            public_ip=$(curl -s http://checkip.amazonaws.com)
+                            if wget -q --spider http://${public_ip}:5000/; then
                                 echo "Site Available"
                             else
-                                echo "Site Not Available"
                                 exit 1
                             fi
                         '''
