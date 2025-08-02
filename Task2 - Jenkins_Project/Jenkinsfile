@@ -151,16 +151,11 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh '''
-                            cd "Task2 - Jenkins_Project"
-                            echo "Deploying with Docker Hub image..."
-                            ssh ${PROD_UNAME}@${PROD_IP} '
-                                cd /home/ubuntu/weather_app &&
-                                docker pull khaled2infinity/weather-app:latest &&
-                                docker-compose down &&
-                                docker-compose up -d
-                            '
-                        '''
+                        sshagent(['prod-server-ssh-key']) {
+                            sh '''
+                                ssh -o StrictHostKeyChecking=no ${PROD_UNAME}@${PROD_IP} 'cd /home/ubuntu/weather_app && docker pull khaled2infinity/weather-app:v1 && docker-compose down && docker-compose up -d'
+                            '''
+                        }
                     } catch (Exception error) {
                         currentBuild.description = "Stage 'Deployment' FAILED - ${error.getMessage()}"
                         error "Stage 'Deployment' FAILED - ${error.getMessage()}"
