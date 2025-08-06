@@ -90,9 +90,6 @@ fi
 ### Slack Notification
 * The pipeline status and results are sent to Slack and available for developers and DevOps Teams.
 
-<a href='https://postimages.org/' target='_blank'><img src='https://i.postimg.cc/8CyfFCsd/Screenshot-2024-11-23-at-14-17-38.png' border='0' alt='Screenshot-2024-11-23-at-14-17-38'/></a>
-
-
 
 # Key Features
 ### Advantages
