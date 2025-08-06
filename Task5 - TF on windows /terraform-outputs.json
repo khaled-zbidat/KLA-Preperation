@@ -1,0 +1,12 @@
+{
+  "windows_vm_public_ip": {
+    "sensitive": false,
+    "type": "string",
+    "value": "18.194.72.215"
+  },
+  "windows_vm_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "i-0abcdef1234567890"
+  }
+}

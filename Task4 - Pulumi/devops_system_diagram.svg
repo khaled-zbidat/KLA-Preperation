@@ -1,0 +1,99 @@
+<svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1000" height="700" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="500" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2c3e50">DevOps מדעת</text>
+  
+  <!-- Source Code Management -->
+  <g>
+    <rect x="400" y="80" width="200" height="80" rx="15" fill="#e3f2fd" stroke="#1976d2" stroke-width="3"/>
+    <text x="500" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1976d2">קוד ישומים</text>
+    <text x="500" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1565c0">Git Repository</text>
+  </g>
+  
+  <!-- CI/CD Pipeline -->
+  <g>
+    <rect x="400" y="200" width="200" height="80" rx="15" fill="#fff3e0" stroke="#ff9800" stroke-width="3"/>
+    <text x="500" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#e65100">CI/CD</text>
+    <text x="500" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ef6c00">Jenkins / GitLab CI</text>
+  </g>
+  
+  <!-- Infrastructure as Code Tools -->
+  <g>
+    <!-- Terraform -->
+    <rect x="150" y="320" width="150" height="100" rx="15" fill="#f3e5f5" stroke="#673ab7" stroke-width="3"/>
+    <text x="225" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4527a0">Terraform</text>
+    <text x="225" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#5e35b1">Infrastructure</text>
+    <text x="225" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#5e35b1">Provisioning</text>
+    
+    <!-- Pulumi -->
+    <rect x="350" y="320" width="150" height="100" rx="15" fill="#e8f5e8" stroke="#4caf50" stroke-width="3"/>
+    <text x="425" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2e7d32">Pulumi</text>
+    <text x="425" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#388e3c">Modern IaC</text>
+    <text x="425" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#388e3c">Programming Languages</text>
+  </g>
+  
+  <!-- HashiCorp Tools -->
+  <g>
+    <!-- Vault -->
+    <rect x="600" y="250" width="150" height="80" rx="15" fill="#fce4ec" stroke="#e91e63" stroke-width="3"/>
+    <text x="675" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#c2185b">Vault</text>
+    <text x="675" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ad1457">ניהול סודות</text>
+    
+    <!-- Consul -->
+    <rect x="600" y="350" width="150" height="80" rx="15" fill="#e0f2f1" stroke="#009688" stroke-width="3"/>
+    <text x="675" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#00695c">Consul</text>
+    <text x="675" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#00796b">תמזון שירותים וגילוי</text>
+  </g>
+  
+  <!-- Infrastructure/Container Platform -->
+  <g>
+    <rect x="250" y="480" width="500" height="150" rx="20" fill="#f5f5f5" stroke="#424242" stroke-width="4"/>
+    <text x="500" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#212121">לטכנולוגיים</text>
+    
+    <!-- Kubernetes/Docker -->
+    <rect x="280" y="530" width="200" height="70" rx="10" fill="#e3f2fd" stroke="#2196f3" stroke-width="2"/>
+    <text x="380" y="555" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1565c0">Kubernetes</text>
+    <text x="380" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1976d2">Container Orchestration</text>
+    
+    <!-- Cloud Services -->
+    <rect x="520" y="530" width="200" height="70" rx="10" fill="#fff3e0" stroke="#ff9800" stroke-width="2"/>
+    <text x="620" y="555" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#e65100">Cloud Services</text>
+    <text x="620" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ef6c00">AWS / Azure / GCP</text>
+  </g>
+  
+  <!-- Arrows -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#424242"/>
+    </marker>
+  </defs>
+  
+  <!-- Code to CI/CD -->
+  <path d="M 500 160 L 500 200" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- CI/CD to IaC Tools -->
+  <path d="M 450 280 Q 350 300 225 320" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 500 280 L 425 320" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- CI/CD to HashiCorp Tools -->
+  <path d="M 550 260 Q 575 265 600 275" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 550 260 Q 575 315 600 375" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- IaC Tools to Infrastructure -->
+  <path d="M 225 420 Q 225 450 350 480" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 425 420 Q 425 450 450 480" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- HashiCorp Tools to Infrastructure -->
+  <path d="M 675 330 Q 675 400 650 480" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 675 430 Q 675 455 650 480" stroke="#424242" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Bidirectional arrow between Terraform and Pulumi -->
+  <path d="M 300 370 L 350 370" stroke="#9c27b0" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 350 370 L 300 370" stroke="#9c27b0" stroke-width="2" fill="none" marker-start="url(#arrowhead)"/>
+  
+  <!-- Connection between Vault and Consul -->
+  <path d="M 675 330 L 675 350" stroke="#795548" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+</svg>
