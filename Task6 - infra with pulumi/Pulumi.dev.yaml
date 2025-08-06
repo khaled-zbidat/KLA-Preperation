@@ -1,0 +1,4 @@
+config:
+  aws:region: eu-north-1
+  instance_type: t3.large
+  key_name: khaled-aws

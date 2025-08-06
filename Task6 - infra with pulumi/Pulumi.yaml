@@ -1,0 +1,3 @@
+name: aws-ec2-server
+runtime: python
+description: A simple AWS EC2 instance using Pulumi and Python
