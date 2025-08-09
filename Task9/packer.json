@@ -1,0 +1,52 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "region": "eu-north-1",
+    "ami_name": "windows-python-{{timestamp}}"
+  },
+
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "{{user `region`}}",
+      "source_ami_filter": {
+        "filters": {
+          "name": "Windows_Server-2019-English-Full-Base-*",
+          "virtualization-type": "hvm",
+          "root-device-type": "ebs"
+        },
+        "owners": ["amazon"],
+        "most_recent": true
+      },
+      "instance_type": "t3.medium",
+      "ami_name": "{{user `ami_name`}}",
+      "user_data_file": "scripts/winrm-init.ps1",
+      "communicator": "winrm",
+      "winrm_username": "Administrator",
+      "winrm_insecure": true,
+      "winrm_use_ssl": false
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "powershell",
+      "inline": [
+        "Write-Host 'Installing Python...'",
+        "Invoke-WebRequest -Uri https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe -OutFile C:\\python-installer.exe",
+        "Start-Process C:\\python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0 -Wait",
+        "Write-Host 'Python installation completed.'"
+      ]
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "python --version",
+        "pip --version"
+      ]
+    }
+  ]
+}
