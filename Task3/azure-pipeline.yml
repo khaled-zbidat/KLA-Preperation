@@ -1,0 +1,139 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  DOCKER_IMAGE: 'weather-app'
+  DOCKER_TAG: 'v1'
+  PROD_UNAME: 'ubuntu'
+  PROD_IP: '3.126.33.123'
+  DOCKERHUB_SERVICE_CONN: 'dockerhub-service-connection' # Azure DevOps DockerHub connection
+  SSH_SERVICE_CONN: 'prod-server-ssh-service-connection' # Azure DevOps SSH connection
+
+parameters:
+  - name: environment
+    displayName: Choose Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - prod
+
+stages:
+  - stage: Verify_Docker
+    displayName: Verify Docker Installation
+    jobs:
+      - job: verify
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: |
+              echo "Verifying Docker installation..."
+              docker --version
+              docker info
+            displayName: Verify Docker
+
+  - stage: Clean
+    displayName: Clean Environment
+    jobs:
+      - job: clean
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - script: |
+              docker ps -aq | xargs -r docker rm -f
+              docker images -q | xargs -r docker rmi -f
+              docker volume prune -f
+              docker network prune -f
+            displayName: Clean Docker & Workspace
+
+  - stage: Pylint
+    displayName: Run Pylint
+    jobs:
+      - job: lint
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: |
+              cd "Task2 - Jenkins_Project"
+              sudo apt-get update
+              sudo apt-get install -y python3-venv python3-pip
+              python3 -m venv venv
+              . ./venv/bin/activate
+              pip install -r requirements.txt
+              pylint --fail-under=5 app.py
+            displayName: Run Pylint
+
+  - stage: Build
+    displayName: Build Docker Image
+    jobs:
+      - job: build
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: |
+              cd "Task2 - Jenkins_Project"
+              docker build -t $(DOCKER_IMAGE):$(DOCKER_TAG) .
+              docker run -d --name $(DOCKER_IMAGE) -p 5000:5000 $(DOCKER_IMAGE):$(DOCKER_TAG)
+              sleep 3
+            displayName: Build Docker Image
+
+  - stage: Test_Availability
+    displayName: Test Application Availability
+    jobs:
+      - job: test
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: |
+              public_ip=$(curl -s http://checkip.amazonaws.com)
+              if wget -q --spider http://${public_ip}:5000/; then
+                echo "Site Available"
+              else
+                exit 1
+              fi
+            displayName: Test Application Availability
+
+  - stage: Push_To_DockerHub
+    displayName: Push Docker Image
+    dependsOn: Build
+    jobs:
+      - job: push
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: $(DOCKERHUB_SERVICE_CONN)
+              repository: $(DOCKER_IMAGE)
+              command: push
+              tags: $(DOCKER_TAG)
+            displayName: Push Docker Image
+
+  - stage: Deploy
+    displayName: Deploy to Server
+    dependsOn: Push_To_DockerHub
+    condition: and(succeeded(), eq('${{ parameters.environment }}', 'prod'))
+    jobs:
+      - deployment: deploy_prod
+        environment: production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: SSH@0
+                  inputs:
+                    sshEndpoint: $(SSH_SERVICE_CONN)
+                    runOptions: inline
+                    inline: |
+                      cd /home/ubuntu/weather_app
+                      docker pull khaled2infinity/weather-app:v1
+                      docker-compose down
+                      docker-compose up -d
